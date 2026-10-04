@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Logbook · A JEE preparation logger</title>
+    <meta name="description"
+        content="Logbook is a quiet, offline-friendly logger for tracking JEE Main &amp; Advanced syllabus coverage: chapter status, PYQs, revisions and a weighted readiness score.">
+    <meta property="og:title" content="Logbook · A JEE preparation logger">
+    <meta property="og:description"
+        content="Track chapters, PYQs and revisions. See one honest readiness score.">
+    <meta property="og:type" content="website">
+
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%231C2333'/%3E%3Cline x1='13' y1='6' x2='13' y2='34' stroke='%23E2674D' stroke-width='1.8'/%3E%3Cline x1='18' y1='14' x2='32' y2='14' stroke='%23F2ECDF' stroke-width='1.8' stroke-linecap='round' opacity='.6'/%3E%3Cline x1='18' y1='20' x2='29' y2='20' stroke='%23F2ECDF' stroke-width='1.8' stroke-linecap='round' opacity='.6'/%3E%3Cpath d='M18 27.5l3.2 3.2L28 24' fill='none' stroke='%23F2ECDF' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+
+    <script>
+        (function () {
+            try {
+                var t = JSON.parse(localStorage.getItem('logbook.v1.theme'));
+                if (t !== 'dark' && t !== 'light') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.dataset.theme = t;
+            } catch (e) { /* default light */ }
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+       
+        :root {
+            --font-display: 'Plus Jakarta Sans', 'Inter', 'Segoe UI', sans-serif;
+            --font-body: 'Inter', 'Segoe UI', sans-serif;
+            --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+            --paper: #F2ECDF;
+            --sheet: #FBF8F0;
+            --sheet-2: #F6F0E3;
+            --ink: #1C2333;
+            --ink-2: #485063;
+            --ink-3: #686F82;
+            --rule: #DDD3BE;
+            --rule-strong: #C5B99F;
+            --margin: #C2432A;
+           
+
+            --c-none: #9B9280;
+            --c-none-ink: #686F82;
+            --c-theory: #D9951A;
+            --c-theory-ink: #8A5700;
+            --c-theory-tint: rgba(217, 149, 26, .15);
+            --c-pyq: #2F7F5C;
+            --c-pyq-ink: #1F6246;
+            --c-pyq-tint: rgba(47, 127, 92, .12);
+            --c-master: #2A4A8D;
+            --c-master-ink: #2A4A8D;
+            --c-master-tint: rgba(42, 74, 141, .10);
+
+            --glow: rgba(42, 74, 141, .10);
+            --shadow: 0 1px 0 rgba(28, 35, 51, .04), 0 14px 34px -20px rgba(70, 48, 12, .35);
+            --ease: cubic-bezier(.2, .7, .2, 1);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --paper: #11141A;
+            --sheet: #181D26;
+            --sheet-2: #1E2430;
+            --ink: #ECE6D8;
+            --ink-2: #B7B2A6;
+            --ink-3: #8F8C84;
+            --rule: #2A303C;
+            --rule-strong: #3B4353;
+            --margin: #F0765C;
+
+            --c-none: #70747F;
+            --c-none-ink: #8F8C84;
+            --c-theory: #E9B13C;
+            --c-theory-ink: #EBB84C;
+            --c-theory-tint: rgba(233, 177, 60, .14);
+            --c-pyq: #5CC49A;
+            --c-pyq-ink: #6FD0A9;
+            --c-pyq-tint: rgba(92, 196, 154, .13);
+            --c-master: #8FA8EA;
+            --c-master-ink: #A3B8F0;
+            --c-master-tint: rgba(143, 168, 234, .14);
+
+            --glow: rgba(143, 168, 234, .09);
+            --shadow: 0 1px 0 rgba(255, 255, 255, .02), 0 20px 44px -24px rgba(0, 0, 0, .8);
+        }
+
+        .s-not-started { --sc: var(--c-none); --sc-ink: var(--c-none-ink); --sc-tint: transparent; }
+        .s-in-progress { --sc: var(--c-theory); --sc-ink: var(--c-theory-ink); --sc-tint: var(--c-theory-tint); }
+        .s-completed   { --sc: var(--c-pyq); --sc-ink: var(--c-pyq-ink); --sc-tint: var(--c-pyq-tint); }
+        .s-mastered    { --sc: var(--c-master); --sc-ink: var(--c-master-ink); --sc-tint: var(--c-master-tint); }
+
+    
+        *, *::before, *::after { box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            background-image: radial-gradient(1100px 420px at 88% -8%, var(--glow), transparent 62%);
+            background-repeat: no-repeat;
+            color: var(--ink);
+            font-family: var(--font-body);
+            font-size: 15px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+        :focus-visible { outline: 2px solid var(--c-master-ink); outline-offset: 2px; border-radius: 6px; }
+
+        .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        .skip { position: absolute; left: 12px; top: -48px; z-index: 100; padding: 8px 14px; border-radius: 8px; background: var(--ink); color: var(--paper); transition: top .2s; }
+        .skip:focus { top: 12px; }
+
+        .page { max-width: 1320px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 40px) 56px; }
+
+        .cap {
+            font-size: 10.5px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--ink-3);
+        }
+
+  
+        .masthead {
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            padding: 26px 0 18px;
+            border-bottom: 3px double var(--rule-strong);
+        }
+        .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+        .brand-mark { width: 42px; height: 42px; flex: none; }
+        .brand h1 {
+            margin: 0; font: 600 clamp(26px, 4.2vw, 36px)/1 var(--font-display);
+            letter-spacing: -.02em; font-variation-settings: "opsz" 96;
+        }
+        .brand p { margin: 5px 0 0; font-size: 11px; font-weight: 500; letter-spacing: .17em; text-transform: uppercase; color: var(--ink-3); }
+
+        .actions { display: flex; gap: 8px; flex: none; }
+        .tool-btn {
+            display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 13px;
+            border: 1px solid var(--rule-strong); border-radius: 10px; background: var(--sheet);
+            color: var(--ink-2); font-size: 13px; font-weight: 500;
+            transition: color .2s, border-color .2s, background .2s, transform .15s;
+        }
+        .tool-btn:hover { color: var(--ink); border-color: var(--ink-3); }
+        .tool-btn:active { transform: translateY(1px); }
+        .tool-btn svg { width: 17px; height: 17px; flex: none; }
+        .tool-btn.danger:hover { color: var(--margin); border-color: var(--margin); }
+        .theme-btn .i-moon { display: none; }
+        [data-theme="dark"] .theme-btn .i-sun { display: none; }
+        [data-theme="dark"] .theme-btn .i-moon { display: block; }
+        @media (max-width: 700px) {
+            .tool-btn .lbl { display: none; }
+            .tool-btn { width: 40px; height: 40px; padding: 0; justify-content: center; }
+        }
+
+        
+        .overview {
+            display: grid; grid-template-columns: auto minmax(0, 1fr);
+            gap: clamp(24px, 5vw, 72px); align-items: end;
+            padding: 38px 0 32px;
+        }
+        .score-block { display: flex; align-items: flex-end; gap: 22px; }
+        .score-num {
+            font: 600 clamp(88px, 13vw, 156px)/.8 var(--font-display);
+            letter-spacing: -.05em; font-variation-settings: "opsz" 144;
+            font-feature-settings: "lnum" 1;
+            display: flex; align-items: flex-start;
+        }
+        .score-num small {
+            font-size: .36em; letter-spacing: 0; font-weight: 500; color: var(--ink-3);
+            margin: .08em 0 0 .06em; font-variation-settings: "opsz" 48;
+        }
+        .score-cap { display: flex; flex-direction: column; gap: 4px; padding-bottom: 6px; }
+        .score-cap strong { font: 600 19px/1.2 var(--font-display); font-variation-settings: "opsz" 36; }
+        .score-cap span { font-size: 13px; color: var(--ink-3); max-width: 22ch; }
+
+        .meter { display: flex; gap: 2px; height: 12px; border-radius: 99px; overflow: hidden; background: var(--rule); }
+        .meter .seg { display: block; height: 100%; background: var(--sc); width: 0; transition: width .7s var(--ease); }
+        .tallies { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
+        .tally { border-top: 2px solid var(--sc); padding-top: 9px; }
+        .tally b { display: block; font: 600 32px/1 var(--font-display); font-variation-settings: "opsz" 72; font-feature-settings: "lnum" 1; }
+        .tally span { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12.5px; color: var(--ink-2); }
+        .tally .glyph { width: 14px; height: 14px; }
+
+        @media (max-width: 860px) {
+            .overview { grid-template-columns: minmax(0, 1fr); gap: 26px; padding: 28px 0 26px; }
+        }
+        @media (max-width: 480px) {
+            .tallies { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
+            .score-block { gap: 16px; }
+        }
+
+     
+        .toolbar {
+            display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 28px;
+            padding: 14px 0; z-index: 30;
+            border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule);
+            background: color-mix(in srgb, var(--paper) 93%, transparent);
+            -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        }
+        @media (min-width: 1000px) { .toolbar { position: sticky; top: 0; } }
+        .toolbar .tb-group { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 22px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+
+        .seg-ctl { display: inline-flex; padding: 3px; border: 1px solid var(--rule-strong); border-radius: 10px; background: var(--sheet); }
+        .seg-ctl button {
+            padding: 6px 13px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--ink-2);
+            min-height: 30px; transition: background .2s, color .2s;
+        }
+        .seg-ctl button:hover { color: var(--ink); }
+        @media (pointer: coarse) { .seg-ctl button { min-height: 40px; padding: 8px 15px; } .stepper button { width: 44px; height: 44px; } }
+        .seg-ctl button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+        .search { position: relative; }
+        .search svg { position: absolute; left: 12px; top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+        .search input {
+            width: min(260px, 100%); height: 38px; padding: 0 12px 0 36px;
+            border: 1px solid var(--rule-strong); border-radius: 10px; background: var(--sheet); color: var(--ink);
+            font: inherit; font-size: 16px; /* 16px stops iOS zoom-on-focus */
+        }
+        @media (min-width: 700px) { .search input { font-size: 14px; } }
+        .search input::placeholder { color: var(--ink-3); }
+        .search input:focus { outline: none; border-color: var(--c-master); box-shadow: 0 0 0 3px var(--c-master-tint); }
+        @media (max-width: 700px) { .search, .search input { width: 100%; } .toolbar .tb-group:last-child { width: 100%; } .toolbar .tb-group:last-child .search { flex: 1; } }
+
+      
+        .logger { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; padding: 28px 0 6px; align-items: start; }
+        @media (min-width: 1080px) { .logger { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; } }
+
+        .empty { grid-column: 1 / -1; padding: 56px 20px; text-align: center; color: var(--ink-3); font: 500 20px/1.4 var(--font-display); }
+        .empty small { display: block; margin-top: 6px; font: 400 14px var(--font-body); }
+
+        @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .logger.intro .subject { animation: rise .6s var(--ease) both; animation-delay: calc(var(--i) * 90ms); }
+
+        .subject { background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 16px; box-shadow: var(--shadow); }
+
+        .collapsible { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .32s var(--ease), visibility 0s; }
+        .collapsible > .inner { overflow: hidden; min-height: 0; }
+        .subject[data-folded="true"] > .collapsible,
+        .group[data-folded="true"] > .collapsible { grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows .32s var(--ease), visibility 0s .32s; }
+        .logger[data-searching="true"] .collapsible { grid-template-rows: 1fr !important; visibility: visible !important; }
+
+        .chev { width: 16px; height: 16px; flex: none; color: var(--ink-3); transition: transform .25s var(--ease); }
+        [data-folded="true"] > .subject-head .chev,
+        [data-folded="true"] > .group-head .chev { transform: rotate(-90deg); }
+
+        .subject-head { display: block; width: 100%; padding: 20px 20px 16px; border-radius: 16px; }
+        .subject-head:hover .subject-name { color: var(--c-master-ink); }
+        .subject-top { display: flex; align-items: center; gap: 12px; }
+        .subject-name { flex: 1; display: flex; align-items: baseline; gap: 10px; font: 600 26px/1.1 var(--font-display); font-variation-settings: "opsz" 72; letter-spacing: -.01em; transition: color .2s; }
+        .subject-name i { font: 500 13px var(--font-mono); font-style: normal; color: var(--ink-3); letter-spacing: .05em; }
+        .subject-pct { font: 600 30px/1 var(--font-display); font-variation-settings: "opsz" 72; font-feature-settings: "lnum" 1; color: var(--ink); }
+        .subject-pct small { font-size: .5em; color: var(--ink-3); font-weight: 500; margin-left: 1px; }
+        .subject-pct.full { color: var(--c-pyq-ink); }
+        .subject-head .meter { height: 8px; margin: 14px 0 12px; }
+        .subject-meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); }
+        .counts { display: flex; gap: 12px; }
+        .counts span { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); color: var(--ink-2); }
+        .counts .glyph { width: 13px; height: 13px; }
+
+        .groups { border-top: 1px solid var(--rule-strong); }
+        .group + .group { border-top: 1px solid var(--rule); }
+        .group-head {
+            display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 20px 11px 16px;
+            background: var(--sheet-2); transition: background .2s;
+        }
+        .group-head:hover { background: color-mix(in srgb, var(--sheet-2) 70%, var(--rule)); }
+        .group-title { flex: 1; min-width: 0; font-size: 11.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
+        .group-title em { margin-left: 8px; font-style: normal; font-weight: 500; letter-spacing: .04em; text-transform: none; font-size: 12px; color: var(--ink-3); }
+        .group-count { font: 500 12px var(--font-mono); color: var(--ink-3); }
+        .group-pct { min-width: 38px; text-align: right; font: 500 12px var(--font-mono); color: var(--ink-2); }
+        .group-pct.full { color: var(--c-pyq-ink); }
+
+        .chapter { border-top: 1px dashed var(--rule); }
+        .chapter:first-child { border-top: 0; }
+        .chapter-row {
+            display: flex; align-items: center; gap: 13px; width: 100%; min-height: 54px; padding: 8px 20px 8px 18px;
+            transition: background .15s, box-shadow .2s;
+        }
+        .chapter-row:hover { background: var(--sheet-2); }
+        .chapter[data-open="true"] > .chapter-row { background: var(--sheet-2); box-shadow: inset 3px 0 0 var(--margin); }
+        .glyph { width: 22px; height: 22px; flex: none; color: var(--sc, var(--c-none)); }
+        .glyph .on { stroke: var(--sheet); }
+        .glyph .on-fill { fill: var(--sheet); }
+        .chapter-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+        .chapter-name { font-size: 14.5px; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
+        .chapter-sub { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--ink-3); line-height: 1.3; }
+        .rev { display: inline-flex; align-items: center; gap: 3px; padding: 0 6px; border-radius: 99px; background: var(--c-master-tint); color: var(--c-master-ink); font: 500 11px var(--font-mono); }
+        .chapter-end { display: flex; align-items: center; gap: 10px; flex: none; }
+        .cls { font: 500 10.5px var(--font-mono); letter-spacing: .06em; color: var(--ink-3); border: 1px solid var(--rule-strong); border-radius: 5px; padding: 1px 6px; }
+        .chev-sm { width: 14px; height: 14px; color: var(--ink-3); transition: transform .25s var(--ease); }
+        .chapter[data-open="true"] .chev-sm { transform: rotate(180deg); }
+
+        mark { background: linear-gradient(180deg, transparent 50%, rgba(233, 177, 60, .5) 50%); color: inherit; padding: 0 1px; border-radius: 2px; }
+
+        .chapter-panel { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows .3s var(--ease), visibility 0s .3s; }
+        .chapter[data-open="true"] > .chapter-panel { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows .3s var(--ease), visibility 0s; }
+        .panel-inner { overflow: hidden; min-height: 0; }
+        .panel-body { padding: 4px 20px 18px 18px; background: var(--sheet-2); box-shadow: inset 3px 0 0 var(--margin); }
+        .rev-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px 14px; flex-wrap: wrap; }
+        .panel-body .cap { display: block; margin: 12px 0 7px; }
+
+        .status-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        .status-btn {
+            display: flex; align-items: center; gap: 9px; min-height: 40px; padding: 7px 10px;
+            border: 1px solid var(--rule-strong); border-radius: 9px; background: var(--sheet);
+            font-size: 13px; font-weight: 500; color: var(--ink-2); transition: background .15s, border-color .15s, color .15s;
+        }
+        .status-btn:hover { border-color: var(--sc); }
+        .status-btn .glyph { width: 18px; height: 18px; }
+        .status-btn[aria-pressed="true"] { background: var(--sc-tint); border-color: var(--sc); color: var(--sc-ink); }
+        .status-btn.s-not-started[aria-pressed="true"] { background: var(--rule); color: var(--ink); border-color: var(--rule-strong); }
+
+        .stepper { display: inline-flex; align-items: center; border: 1px solid var(--rule-strong); border-radius: 9px; background: var(--sheet); }
+        .stepper button { width: 38px; height: 38px; font-size: 19px; line-height: 1; color: var(--ink-2); border-radius: 8px; }
+        .stepper button:hover { background: var(--sheet-2); color: var(--ink); }
+        .stepper output { min-width: 34px; text-align: center; font: 500 15px var(--font-mono); }
+        .done-on { margin: 0 0 10px; font-size: 12px; color: var(--ink-3); text-align: right; }
+
+        .topics-head { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--rule-strong); }
+        .topics-head .cap { margin: 0; }
+        .topics-head output { font: 500 12px var(--font-mono); color: var(--ink-2); }
+        .topic-bar { height: 3px; border-radius: 3px; background: var(--rule); margin: 8px 0 6px; overflow: hidden; }
+        .topic-bar span { display: block; height: 100%; background: var(--c-pyq); width: 0; transition: width .4s var(--ease); }
+        .topic-list { max-height: 270px; overflow-y: auto; margin: 0 -6px; padding: 0 6px; scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent; }
+        .topic { display: flex; align-items: flex-start; gap: 10px; padding: 7px 4px; border-radius: 7px; cursor: pointer; }
+        .topic:hover { background: color-mix(in srgb, var(--rule) 55%, transparent); }
+        .topic input {
+            appearance: none; -webkit-appearance: none; flex: none; width: 17px; height: 17px; margin: 2px 0 0;
+            border: 1.5px solid var(--rule-strong); border-radius: 5px; background: var(--sheet);
+            display: grid; place-content: center; cursor: pointer; transition: background .15s, border-color .15s;
+        }
+        .topic input::after { content: ""; width: 8px; height: 4px; margin-top: -2px; border-left: 2px solid var(--sheet); border-bottom: 2px solid var(--sheet); transform: rotate(-45deg) scale(0); transition: transform .15s var(--ease); }
+        .topic input:checked { background: var(--c-pyq); border-color: var(--c-pyq); }
+        .topic input:checked::after { transform: rotate(-45deg) scale(1); }
+        .topic span { font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+        .topic input:checked + span { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--rule-strong); }
+        .topic-note { margin: 10px 0 0; font-size: 11.5px; color: var(--ink-3); }
+        .no-topics { margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed var(--rule-strong); font-size: 12.5px; color: var(--ink-3); font-style: italic; }
+
+        
+        .method { margin: 56px auto 0; max-width: 880px; }
+        .method-head { display: flex; align-items: baseline; gap: 14px; padding-bottom: 12px; border-bottom: 3px double var(--rule-strong); }
+        .method-head h2 { margin: 0; font: 600 28px/1.1 var(--font-display); font-variation-settings: "opsz" 72; letter-spacing: -.01em; }
+        .method-head span { font-size: 13px; color: var(--ink-3); }
+        .method > p { margin: 18px 0 0; color: var(--ink-2); max-width: 68ch; }
+
+        .formula {
+            display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px 18px;
+            margin: 26px 0; padding: 26px 20px; border: 1px solid var(--rule-strong); border-radius: 14px; background: var(--sheet);
+            font: 500 clamp(17px, 2.6vw, 22px)/1.2 var(--font-display); font-variation-settings: "opsz" 48;
+        }
+        .formula .lhs { font-style: italic; color: var(--c-master-ink); }
+        .formula .eq { color: var(--ink-3); font-family: var(--font-body); }
+        .frac { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; }
+        .frac .num { padding: 0 6px 7px; border-bottom: 1.5px solid var(--ink-3); }
+        .frac .den { color: var(--ink-2); }
+        .frac i { font-style: italic; }
+
+        .method-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+        @media (max-width: 680px) { .method-grid { grid-template-columns: minmax(0, 1fr); } }
+        .method-grid h3 { margin: 0 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-strong); font: 600 12px var(--font-body); letter-spacing: .13em; text-transform: uppercase; color: var(--ink-2); }
+        .kv { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--rule); font-size: 14px; }
+        .kv > span { display: inline-flex; align-items: center; gap: 9px; color: var(--ink-2); }
+        .kv em { font-style: normal; color: var(--ink-3); font-size: 12.5px; }
+        .kv b { font: 500 14px var(--font-mono); color: var(--ink); }
+        .kv .glyph { width: 17px; height: 17px; }
+        .method .fine { margin: 18px 0 0; padding: 14px 16px; border-left: 3px solid var(--margin); background: var(--sheet); border-radius: 0 10px 10px 0; font-size: 13.5px; color: var(--ink-2); }
+        .method .fine strong { color: var(--ink); font-weight: 600; }
+
+ 
+        .foot { margin-top: 56px; padding-top: 18px; border-top: 3px double var(--rule-strong); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; font-size: 12.5px; color: var(--ink-3); }
+        .foot a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; transition: color .2s, text-decoration-color .2s; }
+        .foot a:hover { color: var(--c-master-ink); text-decoration-color: currentColor; }
+        .foot nav { display: flex; gap: 20px; flex-wrap: wrap; }
+
+        
+        dialog { border: 1px solid var(--rule-strong); border-radius: 18px; background: var(--sheet); color: var(--ink); padding: 0; width: min(420px, calc(100vw - 32px)); box-shadow: var(--shadow); }
+        dialog::backdrop { background: rgba(14, 17, 24, .55); backdrop-filter: blur(3px); }
+        .dlg { padding: 26px 26px 22px; }
+        .dlg h3 { margin: 0 0 8px; font: 600 24px/1.2 var(--font-display); font-variation-settings: "opsz" 48; }
+        .dlg p { margin: 0 0 22px; color: var(--ink-2); font-size: 14px; }
+        .dlg .row { display: flex; justify-content: flex-end; gap: 8px; }
+        .btn { height: 40px; padding: 0 18px; border: 1px solid var(--rule-strong); border-radius: 10px; background: var(--sheet); font-weight: 500; font-size: 14px; transition: background .15s, border-color .15s; }
+        .btn:hover { border-color: var(--ink-3); }
+        .btn.danger { background: var(--margin); border-color: var(--margin); color: #fff; }
+        .btn.danger:hover { filter: brightness(1.08); }
+
+        .toast {
+            position: fixed; left: 50%; bottom: 24px; z-index: 90; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+            padding: 11px 18px; border-radius: 99px; background: var(--ink); color: var(--paper); font-size: 13.5px; font-weight: 500;
+            box-shadow: var(--shadow); transition: opacity .25s, transform .25s var(--ease);
+        }
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 10px; border: 2px solid var(--paper); }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0s !important; transition-duration: .001ms !important; transition-delay: 0s !important; }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip" href="#logger">Skip to the logger</a>
+
+    <div class="page">
+
+        <header class="masthead">
+            <div class="brand">
+                <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+                    <rect width="40" height="40" rx="10" fill="var(--ink)" />
+                    <line x1="13" y1="6" x2="13" y2="34" stroke="var(--margin)" stroke-width="1.8" />
+                    <line x1="18" y1="14" x2="32" y2="14" stroke="var(--paper)" stroke-width="1.8" stroke-linecap="round" opacity=".6" />
+                    <line x1="18" y1="20" x2="29" y2="20" stroke="var(--paper)" stroke-width="1.8" stroke-linecap="round" opacity=".6" />
+                    <path d="M18 27.5l3.2 3.2L28 24" fill="none" stroke="var(--paper)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <div>
+                    <h1>Logbook</h1>
+                    <p>Log your preparation</p>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="tool-btn theme-btn" data-action="theme" aria-label="Switch between light and dark theme" title="Switch theme">
+                    <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6" /></svg>
+                    <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.2A8.2 8.2 0 0 1 9.8 4 8.2 8.2 0 1 0 20 14.2z" /></svg>
+                    <span class="lbl">Theme</span>
+                </button>
+                <button class="tool-btn" data-action="share" aria-label="Download a progress card as an image" title="Download progress card">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v11M7.5 10.5L12 15l4.5-4.5M4.5 19.5h15" /></svg>
+                    <span class="lbl">Progress card</span>
+                </button>
+                <button class="tool-btn danger" data-action="reset" aria-label="Reset all progress" title="Reset progress">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4.5v4.2h4.2" /></svg>
+                    <span class="lbl">Reset</span>
+                </button>
+            </div>
+        </header>
+
+        
+        <section class="overview" aria-label="Overall progress">
+            <div class="score-block">
+                <div class="score-num"><span id="score-pct">0</span><small>%</small></div>
+                <div class="score-cap">
+                    <strong>Exam readiness</strong>
+                    <span id="score-scope"></span>
+                </div>
+            </div>
+            <div class="tally-block">
+                <div class="meter" id="meter-all" role="img" aria-label="Chapters by status">
+                    <span class="seg s-mastered"></span><span class="seg s-completed"></span><span class="seg s-in-progress"></span>
+                </div>
+                <div class="tallies" id="tallies"></div>
+            </div>
+        </section>
+
+       
+        <div class="toolbar" role="toolbar" aria-label="View options">
+            <div class="tb-group">
+                <div class="field">
+                    <span class="cap" id="cap-class">Class</span>
+                    <div class="seg-ctl" role="group" aria-labelledby="cap-class">
+                        <button data-action="pref" data-pref="cls" data-value="11" aria-pressed="false">XI</button>
+                        <button data-action="pref" data-pref="cls" data-value="12" aria-pressed="false">XII</button>
+                        <button data-action="pref" data-pref="cls" data-value="both" aria-pressed="true">Both</button>
+                    </div>
+                </div>
+                <div class="field">
+                    <span class="cap" id="cap-group">Group by</span>
+                    <div class="seg-ctl" role="group" aria-labelledby="cap-group">
+                        <button data-action="pref" data-pref="group" data-value="priority" aria-pressed="true">Priority</button>
+                        <button data-action="pref" data-pref="group" data-value="unit" aria-pressed="false">Unit</button>
+                    </div>
+                </div>
+                <div class="field">
+                    <span class="cap" id="cap-scope">Scope</span>
+                    <div class="seg-ctl" role="group" aria-labelledby="cap-scope">
+                        <button data-action="pref" data-pref="exam" data-value="main" aria-pressed="true">JEE Main</button>
+                        <button data-action="pref" data-pref="exam" data-value="adv" aria-pressed="false">Main + Adv</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tb-group">
+                <label class="search">
+                    <span class="sr">Search chapters</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></svg>
+                    <input type="search" id="search" placeholder="Search chapters" autocomplete="off" spellcheck="false">
+                </label>
+                <button class="tool-btn" id="fold-btn" data-action="fold-all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5" /></svg>
+                    <span class="lbl" id="fold-lbl">Fold groups</span>
+                </button>
+            </div>
+        </div>
+
+     
+        <main id="logger" class="logger intro" aria-label="Syllabus"></main>
+
+    </div>
+
+    <dialog id="reset-dialog" aria-labelledby="reset-title">
+        <form method="dialog" class="dlg">
+            <h3 id="reset-title">Reset all progress?</h3>
+            <p>This clears every chapter status, revision count and topic tick on this device. Your view settings stay as they are. It can't be undone.</p>
+            <div class="row">
+                <button class="btn" value="cancel">Keep my progress</button>
+                <button class="btn danger" value="confirm">Reset</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <canvas id="share-canvas" hidden></canvas>
+
+    <script src="data.js"></script>
+    <script>
+        'use strict';
+        (function () {
+
+          
+            const $ = (s, r = document) => r.querySelector(s);
+            const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+            const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+            const pc = (n, total) => total ? (n / total) * 100 : 0;
+            const ROMAN = { '11': 'XI', '12': 'XII' };
+            const NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+
+
+            const NS = 'logbook.v1.';
+            const K = {
+                status: NS + 'status', revs: NS + 'revs', topics: NS + 'topics', done: NS + 'done',
+                folded: NS + 'folded', group: NS + 'group', cls: NS + 'class', exam: NS + 'exam',
+                theme: NS + 'theme', migrated: NS + 'migrated'
+            };
+            const read = (k, fb) => { try { const v = localStorage.getItem(k); return v === null ? fb : JSON.parse(v); } catch (e) { return fb; } };
+            const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage full / blocked */ } };
+
+            const state = {
+                status: {},      // id -> status key
+                revs: {},        // id -> revision count
+                topics: {},      // id -> { topicName: true }
+                done: {},        // id -> timestamp when first marked PYQs done / mastered
+                folded: {},      // fold id -> true
+                group: 'priority',   // 'priority' | 'unit'
+                cls: 'both',         // '11' | '12' | 'both'
+                exam: 'main'         // 'main' | 'adv'
+            };
+            let query = '';
+            let openChapter = null;
+
+            function save() {
+                write(K.status, state.status); write(K.revs, state.revs); write(K.topics, state.topics);
+                write(K.done, state.done); write(K.folded, state.folded);
+                write(K.group, state.group); write(K.cls, state.cls); write(K.exam, state.exam);
+            }
+
+            function importPrevious() {
+                if (read(K.migrated, false)) return;
+                const old = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+                const status = old('jee_v3_status');
+                if (status && typeof status === 'object' && localStorage.getItem(K.status) === null) {
+                    state.status = status;
+                    const meta = old('jee_v3_meta') || {};
+                    Object.keys(meta).forEach(id => { if (meta[id] && meta[id].rev > 0) state.revs[id] = meta[id].rev; });
+                    state.topics = old('jee_v3_topics') || {};
+                    state.done = old('jee_v3_time') || {};
+                    state.group = localStorage.getItem('jee_v3_view_mode') === 'flat' ? 'unit' : 'priority';
+                    const cf = localStorage.getItem('jee_v3_class_filter'); if (['11', '12', 'both'].includes(cf)) state.cls = cf;
+                    const tm = localStorage.getItem('jee_v3_target_mode'); if (['main', 'adv'].includes(tm)) state.exam = tm;
+                    save();
+                }
+                write(K.migrated, true);
+            }
+
+            function load() {
+                state.status = read(K.status, {}); state.revs = read(K.revs, {}); state.topics = read(K.topics, {});
+                state.done = read(K.done, {}); state.folded = read(K.folded, {});
+                const g = read(K.group, 'priority'); state.group = g === 'unit' ? 'unit' : 'priority';
+                const c = read(K.cls, 'both'); state.cls = ['11', '12', 'both'].includes(c) ? c : 'both';
+                const e = read(K.exam, 'main'); state.exam = e === 'adv' ? 'adv' : 'main';
+                importPrevious();
+            }
+
+            
+            const CHAPTERS = [];
+            const BY_ID = {};
+            syllabus.forEach(s => s.units.forEach(u => u.chapters.forEach(c => {
+                const rec = Object.assign({}, c, { subject: s.subject, unit: u.unitName });
+                CHAPTERS.push(rec); BY_ID[c.id] = rec;
+            })));
+
+            const statusOf = id => statusConfig[state.status[id]] ? state.status[id] : 'not-started';
+            const inScope = c => (state.cls === 'both' || c.cls === state.cls) && (state.exam === 'adv' || !c.isAdv);
+            const chaptersOf = subject => CHAPTERS.filter(c => c.subject === subject && inScope(c));
+            const groupChapters = (subject, key) => chaptersOf(subject).filter(c => state.group === 'priority' ? c.priority === key : c.unit === key);
+
+            const topicCache = {};
+            function topicsFor(c) {
+                if (c.id in topicCache) return topicCache[c.id];
+                const db = topicDatabase[c.subject.toLowerCase()];
+                let list = [];
+                if (db) {
+                    if (db[c.name]) list = db[c.name];
+                    else {
+                        const n = c.name.toLowerCase().trim();
+                        const k = Object.keys(db).find(k => { const x = k.toLowerCase().trim(); return x === n || x.includes(n) || n.includes(x); });
+                        if (k) list = db[k];
+                    }
+                }
+                return (topicCache[c.id] = list);
+            }
+
+           
+            function tally(chs) {
+                let got = 0, max = 0, mastered = 0, pyq = 0, theory = 0;
+                chs.forEach(c => {
+                    const w = (priorityConfig[c.priority] || { weight: 1 }).weight;
+                    const st = statusOf(c.id);
+                    got += w * statusConfig[st].weight; max += w;
+                    if (st === 'mastered') mastered++; else if (st === 'completed') pyq++; else if (st === 'in-progress') theory++;
+                });
+                const n = chs.length;
+                return { n, mastered, pyq, theory, open: n - mastered - pyq - theory, pct: max ? Math.round((got / max) * 100) : 0 };
+            }
+
+           
+            function starPath(cx, cy, R, r) {
+                let d = '';
+                for (let i = 0; i < 10; i++) {
+                    const a = -Math.PI / 2 + i * Math.PI / 5, rad = i % 2 ? r : R;
+                    d += (i ? 'L' : 'M') + (cx + rad * Math.cos(a)).toFixed(2) + ' ' + (cy + rad * Math.sin(a)).toFixed(2);
+                }
+                return d + 'Z';
+            }
+            const STAR = starPath(11, 11.5, 5.3, 2.3);
+            function glyph(st) {
+                const open = '<svg class="glyph s-' + st + '" viewBox="0 0 22 22" aria-hidden="true">';
+                switch (st) {
+                    case 'in-progress':
+                        return open + '<circle cx="11" cy="11" r="8.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 2.6a8.4 8.4 0 0 0 0 16.8z" fill="currentColor"/></svg>';
+                    case 'completed':
+                        return open + '<circle cx="11" cy="11" r="9.6" fill="currentColor"/><path class="on" d="M6.6 11.5l3.1 3.1 5.8-6.3" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                    case 'mastered':
+                        return open + '<circle cx="11" cy="11" r="9.6" fill="currentColor"/><circle class="on" cx="11" cy="11" r="7.3" fill="none" stroke-width=".9" opacity=".65"/><path class="on-fill" d="' + STAR + '"/></svg>';
+                    default:
+                        return open + '<circle cx="11" cy="11" r="8.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.3 2.7"/></svg>';
+                }
+            }
+            const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+            const CHEV_SM = '<svg class="chev-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+
+          
+            function hl(text) {
+                if (!query) return esc(text);
+                const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+                return text.split(re).map((p, i) => i % 2 ? '<mark>' + esc(p) + '</mark>' : esc(p)).join('');
+            }
+            const ctxLabel = c => state.group === 'priority' ? c.unit : 'Priority ' + c.priority;
+            const pctHTML = p => p + '<small>%</small>';
+
+            function meterHTML(t) {
+                return '<span class="seg s-mastered" style="width:' + pc(t.mastered, t.n) + '%"></span>' +
+                    '<span class="seg s-completed" style="width:' + pc(t.pyq, t.n) + '%"></span>' +
+                    '<span class="seg s-in-progress" style="width:' + pc(t.theory, t.n) + '%"></span>';
+            }
+            function setMeter(el, t) {
+                const w = [pc(t.mastered, t.n), pc(t.pyq, t.n), pc(t.theory, t.n)];
+                Array.from(el.children).forEach((seg, i) => { seg.style.width = w[i] + '%'; });
+            }
+            function metaHTML(t) {
+                return '<span>' + t.n + ' chapters</span><span class="counts">' +
+                    '<span title="Mastered">' + glyph('mastered') + t.mastered + '</span>' +
+                    '<span title="PYQs done">' + glyph('completed') + t.pyq + '</span>' +
+                    '<span title="Theory done">' + glyph('in-progress') + t.theory + '</span></span>';
+            }
+
+            function rowInner(c) {
+                const st = statusOf(c.id), rev = state.revs[c.id] || 0;
+                return '<span class="s-' + st + '">' + glyph(st) + '</span>' +
+                    '<span class="chapter-main">' +
+                    '<span class="chapter-name">' + hl(c.name) + '</span>' +
+                    '<span class="chapter-sub"><span>' + esc(ctxLabel(c)) + '</span>' +
+                    (rev ? '<span class="rev" title="Revised ' + rev + (rev === 1 ? ' time' : ' times') + '">↻ ' + rev + '</span>' : '') + '</span>' +
+                    '</span>' +
+                    '<span class="chapter-end"><span class="cls">' + ROMAN[c.cls] + '</span>' + CHEV_SM + '</span>' +
+                    '<span class="sr">Status: ' + statusConfig[st].label + '.</span>';
+            }
+
+            function doneLine(id) {
+                const ts = state.done[id];
+                if (!ts || !['completed', 'mastered'].includes(statusOf(id))) return '';
+                return 'Finished ' + new Date(ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+
+            function panelHTML(c) {
+                const st = statusOf(c.id), rev = state.revs[c.id] || 0;
+                const topics = topicsFor(c), saved = state.topics[c.id] || {};
+                const ticked = topics.filter(t => saved[t]).length;
+
+                const statusBtns = Object.keys(statusConfig).map(k =>
+                    '<button class="status-btn s-' + k + '" data-action="set-status" data-id="' + c.id + '" data-status="' + k + '" aria-pressed="' + (st === k) + '">' +
+                    glyph(k) + '<span>' + statusConfig[k].label + '</span></button>').join('');
+
+                let topicsHTML;
+                if (topics.length) {
+                    topicsHTML =
+                        '<div class="topics-head"><span class="cap">Topic checklist</span><output id="tp-count-' + c.id + '">' + ticked + '/' + topics.length + '</output></div>' +
+                        '<div class="topic-bar"><span id="tp-bar-' + c.id + '" style="width:' + pc(ticked, topics.length) + '%"></span></div>' +
+                        '<div class="topic-list">' + topics.map((t, i) =>
+                            '<label class="topic"><input type="checkbox" data-action="topic" data-id="' + c.id + '" data-t="' + i + '"' + (saved[t] ? ' checked' : '') + '><span>' + esc(t) + '</span></label>').join('') + '</div>' +
+                        '<p class="topic-note">For reference. Ticks here don\'t change your score.</p>';
+                } else {
+                    topicsHTML = '<p class="no-topics">No topic breakdown is listed for this chapter.</p>';
+                }
+
+                return '<div class="panel-top"><span class="cap">Status</span><div class="status-grid" role="group" aria-label="Status of ' + esc(c.name) + '">' + statusBtns + '</div></div>' +
+                    '<div class="rev-row"><div><span class="cap">Revisions</span><div class="stepper">' +
+                    '<button data-action="rev" data-id="' + c.id + '" data-delta="-1" aria-label="One fewer revision">−</button>' +
+                    '<output id="rev-' + c.id + '" aria-live="polite">' + rev + '</output>' +
+                    '<button data-action="rev" data-id="' + c.id + '" data-delta="1" aria-label="One more revision">+</button></div></div>' +
+                    '<p class="done-on" id="doneon-' + c.id + '">' + doneLine(c.id) + '</p></div>' + topicsHTML;
+            }
+
+            function chapterHTML(c) {
+                const open = openChapter === c.id;
+                return '<div class="chapter s-' + statusOf(c.id) + '" id="ch-' + c.id + '" data-open="' + open + '">' +
+                    '<button class="chapter-row" id="row-' + c.id + '" data-action="toggle-chapter" data-id="' + c.id + '" aria-expanded="' + open + '" aria-controls="panel-' + c.id + '">' + rowInner(c) + '</button>' +
+                    '<div class="chapter-panel" id="panel-' + c.id + '"><div class="panel-inner"><div class="panel-body">' + (open ? panelHTML(c) : '') + '</div></div></div>' +
+                    '</div>';
+            }
+
+            function buildGroups(scoped) {
+                if (state.group === 'priority') {
+                    return priorityOrder.map(p => ({
+                        key: p, title: 'Priority ' + p, sub: (priorityConfig[p] || {}).label || '',
+                        chapters: scoped.filter(c => c.priority === p)
+                    })).filter(g => g.chapters.length);
+                }
+                const seen = [], map = {};
+                scoped.forEach(c => { if (!map[c.unit]) { map[c.unit] = []; seen.push(c.unit); } map[c.unit].push(c); });
+                return seen.map(u => ({ key: u, title: u, sub: '', chapters: map[u] }));
+            }
+
+          
+            function renderlogger() {
+                const q = query.toLowerCase();
+                const host = $('#logger');
+                host.dataset.searching = q ? 'true' : 'false';
+                let html = '';
+                let idx = 0;
+
+                syllabus.forEach((subj, si) => {
+                    const scoped = chaptersOf(subj.subject);
+                    if (!scoped.length) return;
+
+                    const subjectHit = subj.subject.toLowerCase().includes(q);
+                    let groupsHTML = '';
+
+                    buildGroups(scoped).forEach(g => {
+                        const rows = g.chapters.filter(c => !q || subjectHit || c.name.toLowerCase().includes(q) || c.unit.toLowerCase().includes(q));
+                        if (!rows.length) return;
+                        const gt = tally(g.chapters);
+                        const fid = subj.subject + '|' + state.group + '|' + g.key;
+                        const folded = !!state.folded[fid];
+                        groupsHTML +=
+                            '<div class="group" data-key="' + esc(g.key) + '" data-folded="' + folded + '">' +
+                            '<button class="group-head" data-action="toggle-group" data-id="' + esc(fid) + '" aria-expanded="' + !folded + '">' + CHEV +
+                            '<span class="group-title">' + esc(g.title) + (g.sub ? '<em>' + esc(g.sub) + '</em>' : '') + '</span>' +
+                            '<span class="group-count js-gcount">' + (gt.mastered + gt.pyq) + '/' + gt.n + '</span>' +
+                            '<span class="group-pct js-gpct' + (gt.pct === 100 ? ' full' : '') + '">' + gt.pct + '%</span></button>' +
+                            '<div class="collapsible"><div class="inner">' + rows.map(chapterHTML).join('') + '</div></div></div>';
+                    });
+                    if (!groupsHTML) return;
+
+                    const st = tally(scoped);
+                    const sid = 'subj|' + subj.subject;
+                    const folded = !!state.folded[sid];
+                    html +=
+                        '<section class="subject" style="--i:' + (idx++) + '" data-subject="' + esc(subj.subject) + '" data-folded="' + folded + '">' +
+                        '<button class="subject-head" data-action="toggle-subject" data-id="' + esc(sid) + '" aria-expanded="' + !folded + '">' +
+                        '<span class="subject-top"><span class="subject-name"><i>' + NUMERALS[si] + '.</i>' + esc(subj.subject) + '</span>' +
+                        '<span class="subject-pct js-pct' + (st.pct === 100 ? ' full' : '') + '">' + pctHTML(st.pct) + '</span>' + CHEV + '</span>' +
+                        '<span class="meter js-meter">' + meterHTML(st) + '</span>' +
+                        '<span class="subject-meta js-meta">' + metaHTML(st) + '</span></button>' +
+                        '<div class="collapsible"><div class="inner"><div class="groups">' + groupsHTML + '</div></div></div></section>';
+                });
+
+                host.innerHTML = html || '<div class="empty">Nothing matches “' + esc(query) + '”<small>Try a shorter word, or widen the class and scope filters.</small></div>';
+                syncFoldBtn();
+            }
+
+            function renderOverview() {
+                const t = tally(CHAPTERS.filter(inScope));
+                $('#score-pct').textContent = t.pct;
+                $('#score-scope').textContent =
+                    (state.cls === 'both' ? 'Class XI + XII' : 'Class ' + ROMAN[state.cls]) + ' · ' +
+                    (state.exam === 'main' ? 'JEE Main' : 'Main + Advanced') + ' · ' + t.n + ' chapters';
+                setMeter($('#meter-all'), t);
+                $('#t-mastered').textContent = t.mastered;
+                $('#t-completed').textContent = t.pyq;
+                $('#t-in-progress').textContent = t.theory;
+                $('#t-not-started').textContent = t.open;
+            }
+
+            function updateAggregates() {
+                $$('.subject').forEach(sec => {
+                    const subj = sec.dataset.subject, t = tally(chaptersOf(subj));
+                    const pct = $('.js-pct', sec);
+                    pct.innerHTML = pctHTML(t.pct); pct.classList.toggle('full', t.pct === 100);
+                    setMeter($('.js-meter', sec), t);
+                    $('.js-meta', sec).innerHTML = metaHTML(t);
+                    $$('.group', sec).forEach(g => {
+                        const gt = tally(groupChapters(subj, g.dataset.key));
+                        $('.js-gcount', g).textContent = (gt.mastered + gt.pyq) + '/' + gt.n;
+                        const gp = $('.js-gpct', g);
+                        gp.textContent = gt.pct + '%'; gp.classList.toggle('full', gt.pct === 100);
+                    });
+                });
+                renderOverview();
+            }
+
+            function initStatic() {
+                
+                const tallies = $('#tallies');
+                if (tallies) {
+                    tallies.innerHTML = ['mastered', 'completed', 'in-progress', 'not-started'].map(k =>
+                        '<div class="tally s-' + k + '"><b id="t-' + k + '">0</b><span>' + glyph(k) + statusConfig[k].label + '</span></div>').join('');
+                }
+            }
+
+            function syncControls() {
+                $$('.seg-ctl button').forEach(b => {
+                    const cur = b.dataset.pref === 'cls' ? state.cls : b.dataset.pref === 'group' ? state.group : state.exam;
+                    b.setAttribute('aria-pressed', String(b.dataset.value === cur));
+                });
+            }
+            function syncFoldBtn() {
+                const anyOpen = $$('#logger .group').some(g => g.dataset.folded !== 'true');
+                $('#fold-lbl').textContent = anyOpen ? 'Fold groups' : 'Unfold groups';
+            }
+            function renderAll() { syncControls(); renderOverview(); renderlogger(); }
+
+           
+            function toggleFold(btn) {
+                const host = btn.closest('.subject, .group');
+                const folded = host.dataset.folded !== 'true';
+                host.dataset.folded = String(folded);
+                btn.setAttribute('aria-expanded', String(!folded));
+                if (folded) state.folded[btn.dataset.id] = true; else delete state.folded[btn.dataset.id];
+                save(); syncFoldBtn();
+            }
+
+            function foldAll() {
+                const groups = $$('#logger .group');
+                const fold = groups.some(g => g.dataset.folded !== 'true');
+                groups.forEach(g => {
+                    const btn = $('.group-head', g);
+                    g.dataset.folded = String(fold);
+                    btn.setAttribute('aria-expanded', String(!fold));
+                    if (fold) state.folded[btn.dataset.id] = true; else delete state.folded[btn.dataset.id];
+                });
+                save(); syncFoldBtn();
+            }
+
+            function closeChapterEl(id) {
+                const ch = document.getElementById('ch-' + id);
+                if (!ch) return;
+                ch.dataset.open = 'false';
+                $('.chapter-row', ch).setAttribute('aria-expanded', 'false');
+            }
+            function toggleChapter(id) {
+                const prev = openChapter;
+                if (prev) closeChapterEl(prev);
+                if (prev === id) { openChapter = null; return; }
+                const ch = document.getElementById('ch-' + id);
+                if (!ch) return;
+                $('.panel-body', ch).innerHTML = panelHTML(BY_ID[id]);
+                ch.dataset.open = 'true';
+                $('.chapter-row', ch).setAttribute('aria-expanded', 'true');
+                openChapter = id;
+            }
+
+            function refreshRow(id) {
+                const ch = document.getElementById('ch-' + id);
+                if (!ch) return;
+                ch.className = 'chapter s-' + statusOf(id);
+                $('.chapter-row', ch).innerHTML = rowInner(BY_ID[id]);
+            }
+
+            function setStatus(id, next) {
+                if (!statusConfig[next]) return;
+                const isDone = s => s === 'completed' || s === 'mastered';
+                const prev = statusOf(id);
+                if (isDone(next) && !isDone(prev)) state.done[id] = Date.now();
+                else if (!isDone(next) && isDone(prev)) delete state.done[id];
+                state.status[id] = next;
+                save();
+                $$('#panel-' + id + ' .status-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.status === next)));
+                const d = $('#doneon-' + id); if (d) d.textContent = doneLine(id);
+                refreshRow(id); updateAggregates();
+            }
+
+            function bumpRev(id, delta) {
+                const val = Math.max(0, (state.revs[id] || 0) + delta);
+                if (val) state.revs[id] = val; else delete state.revs[id];
+                save();
+                const out = $('#rev-' + id); if (out) out.textContent = val;
+                refreshRow(id);
+            }
+
+            function setPref(pref, value) {
+                if (pref === 'cls') state.cls = value;
+                else if (pref === 'group') state.group = value;
+                else if (pref === 'exam') state.exam = value;
+                if (openChapter && !inScope(BY_ID[openChapter])) openChapter = null;
+                save(); renderAll();
+            }
+
+            function toggleTheme() {
+                const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+                document.documentElement.dataset.theme = next;
+                write(K.theme, next);
+            }
+
+            function resetProgress() {
+                state.status = {}; state.revs = {}; state.topics = {}; state.done = {};
+                openChapter = null;
+                save(); renderAll();
+                toast('Progress cleared');
+            }
+
+            let toastTimer;
+            function toast(msg) {
+                const el = $('#toast');
+                el.textContent = msg; el.classList.add('show');
+                clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+            }
+
+         
+            function roundRect(g, x, y, w, h, r) {
+                g.beginPath(); g.moveTo(x + r, y);
+                g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+                g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+            }
+
+            async function shareCard() {
+                try {
+                    await Promise.all([
+                        document.fonts.load('600 100px Fraunces'), document.fonts.load('500 20px "DM Sans"'), document.fonts.load('500 20px "DM Mono"')
+                    ]);
+                } catch (e) { /* fall back to system fonts */ }
+
+                const cv = $('#share-canvas'), g = cv.getContext('2d');
+                const W = 1200, H = 630;
+                cv.width = W; cv.height = H;
+                const css = getComputedStyle(document.documentElement);
+                const v = n => css.getPropertyValue(n).trim();
+                const C = {
+                    paper: v('--paper'), sheet: v('--sheet'), ink: v('--ink'), ink2: v('--ink-2'), ink3: v('--ink-3'),
+                    rule: v('--rule'), ruleS: v('--rule-strong'), margin: v('--margin'),
+                    master: v('--c-master'), pyq: v('--c-pyq'), theory: v('--c-theory'), none: v('--c-none')
+                };
+                const SERIF = '"Fraunces", "Iowan Old Style", Georgia, serif';
+                const SANS = '"DM Sans", system-ui, sans-serif';
+
+                const all = tally(CHAPTERS.filter(inScope));
+
+                
+                g.fillStyle = C.paper; g.fillRect(0, 0, W, H);
+                roundRect(g, 24, 24, W - 48, H - 48, 26); g.fillStyle = C.sheet; g.fill();
+                g.lineWidth = 2; g.strokeStyle = C.ruleS; g.stroke();
+                
+                g.strokeStyle = C.margin; g.lineWidth = 2.5;
+                g.beginPath(); g.moveTo(92, 24); g.lineTo(92, H - 24); g.stroke();
+
+                const X = 130;
+                g.textBaseline = 'alphabetic'; g.textAlign = 'left';
+                g.fillStyle = C.ink; g.font = '600 40px ' + SERIF; g.fillText('Logbook', X, 100);
+                g.fillStyle = C.ink3; g.font = '500 19px ' + SANS;
+                g.fillText(new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }), X, 132);
+
+               
+                g.fillStyle = C.ink; g.font = '600 210px ' + SERIF;
+                g.fillText(String(all.pct), X - 6, 345);
+                const numW = g.measureText(String(all.pct)).width;
+                g.fillStyle = C.ink3; g.font = '500 76px ' + SERIF; g.fillText('%', X - 6 + numW + 6, 262);
+
+                g.fillStyle = C.ink; g.font = '600 28px ' + SERIF; g.fillText('Exam readiness', X, 392);
+                g.fillStyle = C.ink3; g.font = '400 19px ' + SANS;
+                g.fillText((state.cls === 'both' ? 'Class XI + XII' : 'Class ' + ROMAN[state.cls]) + ' · ' + (state.exam === 'main' ? 'JEE Main' : 'Main + Advanced'), X, 422);
+
+               
+                const tl = [['Mastered', all.mastered, C.master], ['PYQs done', all.pyq, C.pyq], ['Theory', all.theory, C.theory], ['Not started', all.open, C.none]];
+                tl.forEach((t, i) => {
+                    const x = X + i * 142;
+                    g.fillStyle = t[2]; g.fillRect(x, 468, 108, 3);
+                    g.font = '600 46px ' + SERIF; g.fillText(String(t[1]), x, 524);
+                    g.fillStyle = C.ink2; g.font = '500 17px ' + SANS; g.fillText(t[0], x, 552);
+                });
+
+               
+                g.strokeStyle = C.rule; g.lineWidth = 2;
+                g.beginPath(); g.moveTo(724, 70); g.lineTo(724, H - 70); g.stroke();
+
+               
+                const SX = 770, SW = 366;
+                let y = 140;
+                syllabus.forEach(s => {
+                    const chs = chaptersOf(s.subject);
+                    if (!chs.length) return;
+                    const t = tally(chs);
+                    g.fillStyle = C.ink; g.font = '600 31px ' + SERIF; g.textAlign = 'left'; g.fillText(s.subject, SX, y);
+                    g.textAlign = 'right'; g.fillText(t.pct + '%', SX + SW, y); g.textAlign = 'left';
+                    
+                    const by = y + 22;
+                    g.save(); roundRect(g, SX, by, SW, 14, 7); g.clip();
+                    g.fillStyle = C.rule; g.fillRect(SX, by, SW, 14);
+                    let bx = SX;
+                    [[t.mastered, C.master], [t.pyq, C.pyq], [t.theory, C.theory]].forEach(seg => {
+                        const w = SW * pc(seg[0], t.n) / 100;
+                        if (w > 0) { g.fillStyle = seg[1]; g.fillRect(bx, by, w, 14); bx += w; }
+                    });
+                    g.restore();
+                    g.fillStyle = C.ink3; g.font = '400 16px ' + SANS;
+                    g.fillText(t.n + ' chapters · ' + (t.mastered + t.pyq) + ' done', SX, by + 38);
+                    y += 118;
+                });
+
+                g.textAlign = 'right'; g.fillStyle = C.ink3; g.font = '500 16px ' + SANS;
+                g.fillText('A JEE preparation logger', W - 64, H - 52);
+
+                cv.toBlob(blob => {
+                    if (!blob) { toast('Could not create the image'); return; }
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'logbook-' + new Date().toISOString().slice(0, 10) + '.png';
+                    document.body.appendChild(a); a.click(); a.remove();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+                    toast('Progress card downloaded');
+                }, 'image/png');
+            }
+
+    
+            document.addEventListener('click', e => {
+                const el = e.target.closest('[data-action]');
+                if (!el) return;
+                const id = el.dataset.id;
+                switch (el.dataset.action) {
+                    case 'toggle-subject':
+                    case 'toggle-group': toggleFold(el); break;
+                    case 'toggle-chapter': toggleChapter(id); break;
+                    case 'set-status': setStatus(id, el.dataset.status); break;
+                    case 'rev': bumpRev(id, parseInt(el.dataset.delta, 10)); break;
+                    case 'pref': setPref(el.dataset.pref, el.dataset.value); break;
+                    case 'fold-all': foldAll(); break;
+                    case 'theme': toggleTheme(); break;
+                    case 'share': shareCard(); break;
+                    case 'reset': $('#reset-dialog').showModal(); break;
+                }
+            });
+
+            document.addEventListener('change', e => {
+                const el = e.target;
+                if (!el.matches || !el.matches('input[data-action="topic"]')) return;
+                const id = el.dataset.id, name = topicsFor(BY_ID[id])[parseInt(el.dataset.t, 10)];
+                if (!state.topics[id]) state.topics[id] = {};
+                if (el.checked) state.topics[id][name] = true; else delete state.topics[id][name];
+                save();
+                const boxes = $$('#panel-' + id + ' input[data-action="topic"]');
+                const n = boxes.filter(b => b.checked).length;
+                $('#tp-count-' + id).textContent = n + '/' + boxes.length;
+                $('#tp-bar-' + id).style.width = pc(n, boxes.length) + '%';
+            });
+
+            $('#search').addEventListener('input', debounce(e => { query = e.target.value.trim(); renderlogger(); }, 160));
+
+            const dlg = $('#reset-dialog');
+            dlg.addEventListener('close', () => { if (dlg.returnValue === 'confirm') resetProgress(); dlg.returnValue = ''; });
+            dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close('cancel'); });
+
+            
+            load();
+            initStatic();
+            renderAll();
+            setTimeout(() => $('#logger').classList.remove('intro'), 1400);
+        })();
+    </script>
+</body>
+
+</html>
