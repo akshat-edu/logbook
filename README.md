@@ -1,10 +1,10 @@
-<img width="1044" height="796" alt="image" src="https://github.com/user-attachments/assets/bebab161-e586-470e-a595-0d09ffb4fbf2" />**Logbook**
+<img width="324" height="100" alt="image" src="https://github.com/user-attachments/assets/6ec6a647-d06b-42c4-a036-7077b9011054" />**Logbook**
 
 A simple study tracker I made for keeping track of JEE preparation. (made in June uploading here to help others lol XD)
 
 I wanted something where I could quickly see what I've studied, what I still have left, and how much progress I'm actually making, without having to maintain a notebook, or in simple words- to digitalize jee preparation even more :D   
 
-
+DEMO: https://logbookjee.netlify.app/
 
 ## What it is log book
 
